@@ -161,6 +161,15 @@ class PrefabSceneEditor extends hide.comp.SceneEditor {
 			label : "Recents",
 			menu : recents,
 		});
+
+
+		var shaders = newItems.find(i -> i.label == "Shader");
+		if (shaders != null) {
+			newItems.push({label: null, isSeparator: true});
+			newItems.remove(shaders);
+			splitMenu(newItems, "Shader", shaders.menu);
+		}
+
 		return newItems;
 	}
 
@@ -493,7 +502,7 @@ class Prefab extends FileView {
 		toolsDefs.push({
 			id: "renderProps",
 			title: "Render props",
-			type: Popup((e) -> new hide.comp.SceneEditor.RenderPropsPopup(null, e, sceneEditor, true))
+			type: Popup((e) -> new hide.comp.SceneEditor.RenderPropsPopup(null, e, this, sceneEditor, true))
 		});
 
 		toolsDefs.push({

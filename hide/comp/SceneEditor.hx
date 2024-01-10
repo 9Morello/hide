@@ -453,7 +453,7 @@ class HelpPopup extends Popup {
 class RenderPropsPopup extends Popup {
 	var editor:SceneEditor;
 
-	public function new(?parent:Element, ?root:Element, editor:SceneEditor, isSearchable = false, canChangeCurrRp = false) {
+	public function new(?parent:Element, ?root:Element, view:hide.view.FileView, editor:SceneEditor, isSearchable = false, canChangeCurrRp = false) {
 		super(parent, root, isSearchable);
 		this.editor = editor;
 
@@ -476,7 +476,7 @@ class RenderPropsPopup extends Popup {
 			return;
 		}
 
-		var renderProps = hide.Ide.inst.currentConfig.get("scene.renderProps");
+		var renderProps = view.config.getLocal("scene.renderProps");
 
 		if (renderProps is String) {
 			var s_renderProps:String = cast renderProps;
@@ -826,6 +826,32 @@ class SceneEditor {
 		undo.change(Field(p.props, "tag", prevVal), function() {
 			onPrefabChange(p, "tag");
 		});
+	}
+
+	function splitMenu(menu : Array<hide.comp.ContextMenu.ContextMenuItem>, name : String, entries : Array<hide.comp.ContextMenu.ContextMenuItem>, len : Int = 30) {
+		entries.sort((a,b) -> Reflect.compare(a.label, b.label));
+
+		var pos = 0;
+		while(true) {
+			var arr = entries.slice(pos, pos+len);
+			if (arr.length == 0) {
+				break;
+			}
+			var label = name;
+			var firstChar = arr[0].label.charAt(0);
+			var endChar = (entries.length < pos+len) ? "Z" : arr[arr.length-1].label.charAt(0);
+
+			var label = name + " " + firstChar + "-" + endChar;
+			if (pos == 0 && arr.length < len) {
+				label = name;
+			}
+			menu.push({
+				label: label,
+				menu: arr
+			});
+
+			pos += len;
+		}
 	}
 
 	function getTagMenu(p: PrefabElement) : Array<hide.comp.ContextMenu.ContextMenuItem> {
@@ -1353,6 +1379,9 @@ class SceneEditor {
 				lastRenderProps = r;
 				break;
 			}
+		var worlds = getAllWithRefs(sceneData, hrt.prefab.World);
+		for ( w in worlds )
+			w.editor = this;
 
 		if( lastRenderProps == null )
 			lastRenderProps = renderProps[0];
@@ -2142,8 +2171,13 @@ class SceneEditor {
 			p = p.parent;
 		}
 		var ctx = elt.make(parentCtx);
-		for( p in elt.flatten() )
+		for( p in elt.flatten() ) {
 			makeInteractive(p, ctx.shared);
+			if ( p.type == "world" ) {
+				var world = Std.downcast(p, hrt.prefab.World);
+				world.editor = this;
+			}
+		}
 		scene.init(ctx.local3d);
 	}
 
@@ -3024,6 +3058,8 @@ class SceneEditor {
 			o.locked = locked;
 			for( c in o.flatten(hrt.prefab.Prefab) ) {
 				var el = tree.getElement(c);
+				if (el is Bool)
+					continue;
 				applyTreeStyle(c, el);
 				applySceneStyle(c);
 				toggleInteractive(c,!isLocked(c));

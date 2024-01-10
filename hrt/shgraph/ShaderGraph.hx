@@ -66,6 +66,7 @@ enum Domain {
 	Fragment;
 }
 
+
 class ShaderGraph extends hrt.prefab.Prefab {
 
 	var graphs : Array<Graph>;
@@ -76,7 +77,7 @@ class ShaderGraph extends hrt.prefab.Prefab {
 
 
 	override public function load(json : Dynamic) : Void {
-
+		super.load(json);
 		graphs = [];
 		parametersAvailable = [];
 		parametersKeys = [];
@@ -95,6 +96,7 @@ class ShaderGraph extends hrt.prefab.Prefab {
 
 
 	override function save() {
+		super.save();
 		var json : Dynamic = {};
 
 		json.parameters = [
@@ -1062,6 +1064,9 @@ class Graph {
 							}
 
 							var inVar = getOutsideVar(nodeVar.v.name, nodeVar.v, true, false);
+							if (inVar.name == "input.normal" && includePreviews) {
+								inVar.name = "fakeNormal";
+							}
 
 							var shParam = Std.downcast(currentNode.instance, ShaderParam);
 							if (shParam != null) {
