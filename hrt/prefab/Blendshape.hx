@@ -24,15 +24,15 @@ class BlendShape extends hrt.prefab.Model {
 	override function edit( ectx : hide.prefab.EditContext ) {
 		super.edit(ectx);
 
-		var mesh = Std.downcast(local3d, h3d.scene.Mesh);
-		var hmdModel = Std.downcast(mesh.primitive, h3d.prim.HMDModel);
-
 		var props = ectx.properties.add(new hide.Element('
 		<div class="group" name="Shapes">
 			<dt>Amount</dt><dd><input type="range" min="0" max="1" field="amount"/></dd>
-			<dt>Index</dt><dd><input type="range" min="0" max="${hmdModel.getBlendshapeCount()}" step="1" field="index"/></dd>
+			<dt>Index</dt><dd><input type="range" min="0" max="3" step="1" field="index"/></dd>
 		</div>
 		'), this, function(pname) {
+			var mesh = Std.downcast(local3d, h3d.scene.Mesh);
+			var hmdModel = Std.downcast(mesh.primitive, h3d.prim.HMDModel);
+
 			ectx.onChange(this, pname);
 			hmdModel.setBlendshapeAmount(index, amount);
 		});
