@@ -483,6 +483,24 @@ class Model extends FileView {
 					@:privateAccess hmd.blendshape.setBlendshapeAmount(blendShape.find("#bs-index").val(),blendShape.find("#bs-amount").val());
 				});
 			}
+
+			if (hmd != null && @:privateAccess hmd.lib.header.lods.length > 0) {
+				var lodCount = @:privateAccess hmd.lib.header.lods.length;
+                var lods = new Element('
+                <div class="group" name="LODs">
+                    <dt>Lods count</dt><dd>${lodCount}</dd>
+					<dt>Lods idx</dt><dd><input id="lod-idx" type="range" step="1" min="0" max="${lodCount - 1}" field=""/></dd>
+                </div>');
+
+                properties.add(lods, null, function(pname) {
+					var selectedLodIdx = lods.find("#lod-idx").val();
+					if (selectedLodIdx < 0 || selectedLodIdx >= lodCount)
+						return;
+
+					@:privateAccess hmd.data = @:privateAccess hmd.lib.header.lods[selectedLodIdx].geom;
+					@:privateAccess hmd.alloc(h3d.Engine.getCurrent());
+                });
+            }
 		}
 
 		var select = e.find(".follow");
